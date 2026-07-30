@@ -15,17 +15,17 @@
         /* ボタンのデザイン */
         .btn { display: block; width: 100%; padding: 15px; background-color: #3498db; color: #fff; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-top: 20px; transition: background-color 0.3s; }
         .btn:hover { background-color: #2980b9; }
-        
-        /* 戻る・やり直すボタン用のサブデザイン（グレー） */
         .btn-secondary { background-color: #95a5a6; margin-top: 10px; }
         .btn-secondary:hover { background-color: #7f8c8d; }
 
         .result-box { background-color: #e8f6f3; padding: 20px; border-radius: 5px; margin-top: 20px; text-align: center; }
         .course-name { font-size: 24px; font-weight: bold; color: #1abc9c; margin: 10px 0; }
-        .img-placeholder { width: 100%; height: 150px; background-color: #ddd; display: flex; align-items: center; justify-content: center; color: #777; margin: 10px 0; border-radius: 5px; }
         .scholarship-text { font-weight: bold; color: #e74c3c; margin-top: 15px; }
         .disclaimer { font-size: 12px; font-weight: bold; color: #c0392b; margin-top: 30px; padding-top: 15px; border-top: 2px dashed #c0392b; text-align: center; }
         .hidden { display: none; }
+        
+        /* 画像の基本スタイル */
+        img { border-radius: 5px; margin-top: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
@@ -46,7 +46,6 @@
         <div id="p1-courses" class="result-box"></div>
         <p style="text-align:center; margin-top:20px;">この結果をもとに、さらに詳しい判定を行いますか？</p>
         <button class="btn" onclick="showPhase2()">あなたの成績とおすすめコースをマッチングする</button>
-        <!-- 【追加】戻るボタン -->
         <button class="btn btn-secondary" onclick="goBackToPhase1()">質問に戻る</button>
     </div>
 
@@ -64,7 +63,6 @@
             </select>
         </div>
         <button class="btn" onclick="calculatePhase2()">最終結果を見る</button>
-        <!-- 【追加】戻るボタン -->
         <button class="btn btn-secondary" onclick="goBackToPhase1Result()">おすすめコース結果に戻る</button>
     </div>
 
@@ -77,12 +75,28 @@
             【注意事項】<br>この結果は合格をお約束するものではありません。<br>詳しいお話は個別相談でお伺いします。
         </div>
 
-        <!-- 【追加】最初からやり直すボタン -->
         <button class="btn btn-secondary" style="margin-top: 30px;" onclick="resetQuiz()">もう一度最初から回答する</button>
     </div>
 </div>
 
 <script>
+    // --- 画像ファイル名変換用の設定（マッピング） ---
+    const courseImageMap = {
+        "特進S[SS]": "SS",
+        "特進S[S]": "S",
+        "特進GE[SG]": "SG",
+        "特進GE[G]": "G",
+        "特進A[文理国際]": "A",
+        "特進A[スポーツ]": "AS",
+        "進学総合": "sinsou"
+    };
+
+    const scholarshipImageMap = {
+        "入試特待Ａ": "A",
+        "入試特待Ｂ": "B",
+        "入試特待Ｃ": "C"
+    };
+
     // --- 質問データ ---
     const questions = [
         "①大学進学を第一に考えている。",
@@ -109,7 +123,6 @@
         `;
     });
 
-    // グローバル変数
     let recommendedP1 = [];
 
     // --- フェーズ1判定ロジック ---
@@ -131,18 +144,13 @@
         }
 
         if (ans.q1 === "yes") { scores["特進S[SS]"]+=10; scores["特進S[S]"]+=10; scores["特進GE[SG]"]+=10; scores["特進GE[G]"]+=10; scores["特進A[文理国際]"]+=10; }
-        
         if (ans.q2 === "yes") { scores["特進GE[SG]"]+=100; scores["特進GE[G]"]+=100; }
         else if (ans.q2 === "no") { scores["特進GE[SG]"]-=1000; scores["特進GE[G]"]-=1000; }
-        
         if (ans.q3 === "yes") { scores["特進S[SS]"]+=100; scores["特進GE[SG]"]+=100; }
         else if (ans.q3 === "no") { scores["特進S[SS]"]-=1000; scores["特進GE[SG]"]-=1000; }
-        
         if (ans.q4 === "yes") { scores["特進S[S]"]+=10; scores["特進GE[G]"]+=10; scores["特進A[文理国際]"]+=10; scores["特進A[スポーツ]"]+=10; scores["進学総合"]+=10; }
-        
         if (ans.q5 === "yes") { scores["特進A[スポーツ]"]+=100; }
         else if (ans.q5 === "no") { scores["特進A[スポーツ]"]-=1000; }
-        
         if (ans.q6 === "yes") { scores["進学総合"]+=100; }
         else if (ans.q6 === "no") { scores["進学総合"]-=1000; }
 
@@ -202,41 +210,45 @@
 
         if (finalCourses.length > 0) {
             finalCourses.forEach(course => {
+                // コース名からファイル名用のキーワードを取得
+                const fileKey = courseImageMap[course]; 
                 outputDiv.innerHTML += `
                     <div class="result-box">
                         <p>あなたにオススメのコースは</p>
                         <div class="course-name">${course}</div>
-                        <!-- <img src="img/course_${course}.jpg" alt="${course}の画像" style="width:100%;"> -->
-                        <div class="img-placeholder">（${course}の画像が表示されます）</div>
+                        <img src="img/course_${fileKey}.jpg" alt="${course}の画像" style="width:100%;">
                     </div>
                 `;
             });
 
             if (scholarship !== "") {
+                const tokutaiKey = scholarshipImageMap[scholarship];
                 outputDiv.innerHTML += `
                     <div class="result-box" style="background-color: #fff3e0;">
                         <p class="scholarship-text">また、専願でご受験いただければ<br>【${scholarship}】が適応できるかもしれません。</p>
-                        <!-- <img src="img/tokutai_${scholarship}.jpg" alt="${scholarship}の画像" style="width:100%;"> -->
-                        <div class="img-placeholder" style="background-color: #ffe0b2;">（${scholarship}の案内画像が表示されます）</div>
+                        <img src="img/tokutai_${tokutaiKey}.jpg" alt="${scholarship}の画像" style="width:100%;">
                     </div>
                 `;
             }
         } else {
             let fallbackCourse = targetGroup[0];
             let idealCourse = recommendedP1[0];
+            const fileKey = courseImageMap[fallbackCourse];
             
             outputDiv.innerHTML = `
                 <div class="result-box" style="background-color: #fdf2e9;">
                     <p>あなたの希望に合う <strong>${idealCourse}</strong> を目指すには、さらに成績アップが必要です！<br>
-                    今の成績でのおすすめコースは <strong>${fallbackCourse}</strong> です。</p>
+                    今の成績から確実に入学できる現実的なおすすめコースは <strong>${fallbackCourse}</strong> です。</p>
+                    <img src="img/course_${fileKey}.jpg" alt="${fallbackCourse}の画像" style="width:100%;">
                 </div>
             `;
             
             if (scholarship !== "") {
+                const tokutaiKey = scholarshipImageMap[scholarship];
                  outputDiv.innerHTML += `
                     <div class="result-box" style="background-color: #fff3e0;">
                         <p class="scholarship-text">また、専願でご受験いただければ<br>【${scholarship}】が適応できるかもしれません。</p>
-                        <div class="img-placeholder" style="background-color: #ffe0b2;">（${scholarship}の案内画像が表示されます）</div>
+                        <img src="img/tokutai_${tokutaiKey}.jpg" alt="${scholarship}の画像" style="width:100%;">
                     </div>
                 `;
             }
@@ -246,36 +258,25 @@
         document.getElementById('phase2-result').classList.remove('hidden');
     }
 
-    // --- 【追加】戻る・やり直す機能のロジック ---
-    
-    // フェーズ1結果から、質問画面（フェーズ1）へ戻る
+    // --- 戻る・やり直す機能 ---
     function goBackToPhase1() {
         document.getElementById('phase1-result').classList.add('hidden');
         document.getElementById('phase1').classList.remove('hidden');
     }
 
-    // フェーズ2（成績入力）から、フェーズ1結果へ戻る
     function goBackToPhase1Result() {
         document.getElementById('phase2').classList.add('hidden');
         document.getElementById('phase1-result').classList.remove('hidden');
     }
 
-    // 最終結果から、すべてをリセットして最初からやり直す
     function resetQuiz() {
-        // フォームの選択状態をリセット
         document.getElementById('quizForm').reset();
         document.getElementById('gradeSelect').selectedIndex = 0;
-        
-        // 変数をリセット
         recommendedP1 = [];
-
-        // 画面の表示状態を初期画面に戻す
         document.getElementById('phase2-result').classList.add('hidden');
         document.getElementById('phase1-result').classList.add('hidden');
         document.getElementById('phase2').classList.add('hidden');
         document.getElementById('phase1').classList.remove('hidden');
-        
-        // 画面の一番上へスクロール
         window.scrollTo(0, 0);
     }
 </script>
