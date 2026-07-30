@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>おすすめコース診断</title>
+    <title>神戸野田高校　おすすめコース診断</title>
     <style>
         body { font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; background-color: #f9f9f9; color: #333; padding: 20px; }
         .container { max-width: 600px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -11,8 +11,15 @@
         .question-block { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
         .question-text { font-weight: bold; margin-bottom: 10px; }
         .options label { display: inline-block; margin-right: 15px; cursor: pointer; }
+        
+        /* ボタンのデザイン */
         .btn { display: block; width: 100%; padding: 15px; background-color: #3498db; color: #fff; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; margin-top: 20px; transition: background-color 0.3s; }
         .btn:hover { background-color: #2980b9; }
+        
+        /* 戻る・やり直すボタン用のサブデザイン（グレー） */
+        .btn-secondary { background-color: #95a5a6; margin-top: 10px; }
+        .btn-secondary:hover { background-color: #7f8c8d; }
+
         .result-box { background-color: #e8f6f3; padding: 20px; border-radius: 5px; margin-top: 20px; text-align: center; }
         .course-name { font-size: 24px; font-weight: bold; color: #1abc9c; margin: 10px 0; }
         .img-placeholder { width: 100%; height: 150px; background-color: #ddd; display: flex; align-items: center; justify-content: center; color: #777; margin: 10px 0; border-radius: 5px; }
@@ -39,6 +46,8 @@
         <div id="p1-courses" class="result-box"></div>
         <p style="text-align:center; margin-top:20px;">この結果をもとに、さらに詳しい判定を行いますか？</p>
         <button class="btn" onclick="showPhase2()">あなたの成績とおすすめコースをマッチングする</button>
+        <!-- 【追加】戻るボタン -->
+        <button class="btn btn-secondary" onclick="goBackToPhase1()">質問に戻る</button>
     </div>
 
     <!-- フェーズ2：成績入力エリア -->
@@ -55,6 +64,8 @@
             </select>
         </div>
         <button class="btn" onclick="calculatePhase2()">最終結果を見る</button>
+        <!-- 【追加】戻るボタン -->
+        <button class="btn btn-secondary" onclick="goBackToPhase1Result()">おすすめコース結果に戻る</button>
     </div>
 
     <!-- フェーズ2：最終結果エリア -->
@@ -65,6 +76,9 @@
         <div class="disclaimer">
             【注意事項】<br>この結果は合格をお約束するものではありません。<br>詳しいお話は個別相談でお伺いします。
         </div>
+
+        <!-- 【追加】最初からやり直すボタン -->
+        <button class="btn btn-secondary" style="margin-top: 30px;" onclick="resetQuiz()">もう一度最初から回答する</button>
     </div>
 </div>
 
@@ -100,7 +114,6 @@
 
     // --- フェーズ1判定ロジック ---
     function calculatePhase1() {
-        // 各コースの初期スコア
         let scores = {
             "特進S[SS]": 0, "特進S[S]": 0, "特進GE[SG]": 0, 
             "特進GE[G]": 0, "特進A[文理国際]": 0, "特進A[スポーツ]": 0, "進学総合": 0
@@ -117,7 +130,6 @@
             if (val !== "no" && val !== "neither") allNo = false;
         }
 
-        // スコア加算・減算処理 (★=100, -1000 / 〇=10)
         if (ans.q1 === "yes") { scores["特進S[SS]"]+=10; scores["特進S[S]"]+=10; scores["特進GE[SG]"]+=10; scores["特進GE[G]"]+=10; scores["特進A[文理国際]"]+=10; }
         
         if (ans.q2 === "yes") { scores["特進GE[SG]"]+=100; scores["特進GE[G]"]+=100; }
@@ -147,7 +159,6 @@
             }
         }
 
-        // 例外処理（フォールバック）
         if (allNeither) {
             recommendedP1 = ["特進S[S]", "特進GE[G]", "特進A[文理国際]", "進学総合"];
         } else if (recommendedP1.length === 0) {
@@ -185,19 +196,16 @@
             targetGroup = ["進学総合"];
         }
 
-        // マッチング（積集合）
         const finalCourses = recommendedP1.filter(course => targetGroup.includes(course));
         const outputDiv = document.getElementById('final-output');
         outputDiv.innerHTML = "";
 
         if (finalCourses.length > 0) {
-            // マッチング成功
             finalCourses.forEach(course => {
                 outputDiv.innerHTML += `
                     <div class="result-box">
                         <p>あなたにオススメのコースは</p>
                         <div class="course-name">${course}</div>
-                        <!-- 画像追加時はここを書き換え -->
                         <!-- <img src="img/course_${course}.jpg" alt="${course}の画像" style="width:100%;"> -->
                         <div class="img-placeholder">（${course}の画像が表示されます）</div>
                     </div>
@@ -208,16 +216,14 @@
                 outputDiv.innerHTML += `
                     <div class="result-box" style="background-color: #fff3e0;">
                         <p class="scholarship-text">また、専願でご受験いただければ<br>【${scholarship}】が適応できるかもしれません。</p>
-                        <!-- 画像追加時はここを書き換え -->
                         <!-- <img src="img/tokutai_${scholarship}.jpg" alt="${scholarship}の画像" style="width:100%;"> -->
                         <div class="img-placeholder" style="background-color: #ffe0b2;">（${scholarship}の案内画像が表示されます）</div>
                     </div>
                 `;
             }
         } else {
-            // マッチング0件の場合のフォロー
-            let fallbackCourse = targetGroup[0]; // 現実的なおすすめコース
-            let idealCourse = recommendedP1[0]; // 理想のコース
+            let fallbackCourse = targetGroup[0];
+            let idealCourse = recommendedP1[0];
             
             outputDiv.innerHTML = `
                 <div class="result-box" style="background-color: #fdf2e9;">
@@ -238,6 +244,39 @@
 
         document.getElementById('phase2').classList.add('hidden');
         document.getElementById('phase2-result').classList.remove('hidden');
+    }
+
+    // --- 【追加】戻る・やり直す機能のロジック ---
+    
+    // フェーズ1結果から、質問画面（フェーズ1）へ戻る
+    function goBackToPhase1() {
+        document.getElementById('phase1-result').classList.add('hidden');
+        document.getElementById('phase1').classList.remove('hidden');
+    }
+
+    // フェーズ2（成績入力）から、フェーズ1結果へ戻る
+    function goBackToPhase1Result() {
+        document.getElementById('phase2').classList.add('hidden');
+        document.getElementById('phase1-result').classList.remove('hidden');
+    }
+
+    // 最終結果から、すべてをリセットして最初からやり直す
+    function resetQuiz() {
+        // フォームの選択状態をリセット
+        document.getElementById('quizForm').reset();
+        document.getElementById('gradeSelect').selectedIndex = 0;
+        
+        // 変数をリセット
+        recommendedP1 = [];
+
+        // 画面の表示状態を初期画面に戻す
+        document.getElementById('phase2-result').classList.add('hidden');
+        document.getElementById('phase1-result').classList.add('hidden');
+        document.getElementById('phase2').classList.add('hidden');
+        document.getElementById('phase1').classList.remove('hidden');
+        
+        // 画面の一番上へスクロール
+        window.scrollTo(0, 0);
     }
 </script>
 
