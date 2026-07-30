@@ -20,7 +20,7 @@
         .result-box { background-color: #e8f6f3; padding: 20px; border-radius: 5px; margin-top: 20px; text-align: center; }
         .course-name { font-size: 24px; font-weight: bold; color: #1abc9c; margin: 10px 0; }
         .scholarship-text { font-weight: bold; color: #e74c3c; margin-top: 15px; }
-        .disclaimer { font-size: 12px; font-weight: bold; color: #c0392b; margin-top: 30px; padding-top: 15px; border-top: 2px dashed #c0392b; text-align: center; }
+        .disclaimer { font-size: 22px; font-weight: bold; color: #c0392b; margin-top: 30px; padding-top: 15px; border-top: 2px dashed #c0392b; text-align: center; line-height: 1.4; }
         .hidden { display: none; }
         
         img { border-radius: 5px; margin-top: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
@@ -54,9 +54,9 @@
             <p class="question-text">5教科の通知表の成績と最も近いものを選んでください。</p>
             <select id="gradeSelect" style="width: 100%; padding: 10px; font-size: 16px;">
                 <option value="22">5計22以上</option>
-                <option value="20">5計20以上（5計オール4）</option>
+                <option value="20">5計20以上（5計オール4程度）</option>
                 <option value="18">5計18以上</option>
-                <option value="15">5計15以上（5計オール3）</option>
+                <option value="15">5計15以上（5計オール3程度）</option>
                 <option value="14">5計15以下</option>
             </select>
         </div>
@@ -232,7 +232,7 @@
                 const tokutaiKey = scholarshipImageMap[scholarship];
                 outputDiv.innerHTML += `
                     <div class="result-box" style="background-color: #fff3e0;">
-                        <p class="scholarship-text">また、専願でご受験いただければ<br>【${scholarship}】が適応できるかもしれません。</p>
+                        <p class="scholarship-text">また、専願でご受験いただければ<br>【${scholarship}】が適用できるかもしれません。</p>
                         <img src="img/tokutai_${tokutaiKey}.jpg" alt="${scholarship}の画像" style="width:100%;">
                     </div>
                 `;
